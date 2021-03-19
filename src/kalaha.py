@@ -27,7 +27,6 @@ class Kalaha:
         print("The board: ", self.fields)
         print("player {} will start".format(self.player_turn.name))
 
-        self.run_game()
 
     def run_game(self):
         while self.game_running:
@@ -38,7 +37,8 @@ class Kalaha:
             print("player {} won!".format(self.won))
         else:
             print("It was a tie!")
-        
+
+
 
     def check_result(self):
         if self.fields[6] > sum(self.fields)/2:
@@ -65,18 +65,19 @@ class Kalaha:
 
     def take_turn(self):
         print("It is player {}'s turn".format(self.player_turn.name))
-        selected_field = input("Enter selected field:\n")
+        selected_field = input("Enter selected field:\n") # ask for field selection for next move
 
-        while type(selected_field) is not int:
+        while type(selected_field) is not int: 
             try:
-                selected_field = int(selected_field)
+                selected_field = int(selected_field) # check that input was valid integer
 
                 if (((self.player_turn == self.player_one and 0 <= selected_field <= 6) or 
                     (self.player_turn == self.player_two and 7 <= selected_field <= 12)) and
                     (self.fields[selected_field] > 0)): # check if move is valid
-                    selected_field = self.move(selected_field)
+                    fields, selected_field = self.move(self.fields, selected_field)
                     if selected_field == None:
                         return
+                    self.fields = fields
                 else:
                     raise InvalidField()
 
@@ -96,46 +97,46 @@ class Kalaha:
             self.change_player_turn()
 
 
-    def move(self, selected_field):
+    def move(self, fields, selected_field):
 
-                seeds = self.fields[selected_field] # take seeds from selected field
-                self.fields[selected_field] = 0 # set selected field to empty
+                seeds = fields[selected_field] # take seeds from selected field
+                fields[selected_field] = 0 # set selected field to empty
                 
                 for i in range(1, seeds + 1): # iterate over fields for the number of seeds picked up
-                    selected_field = (selected_field + 1) % len(self.fields) # modulo index of selected field is over the length of fields
+                    selected_field = (selected_field + 1) % len(fields) # modulo index of selected field is over the length of fields
 
                     if selected_field == 6 and self.player_turn == self.player_one or selected_field == 13 and self.player_turn == self.player_two: # check that player is putting seed in own store
-                        self.fields[selected_field] += 1
+                        fields[selected_field] += 1
 
                     elif selected_field == 6 and self.player_turn == self.player_two or selected_field == 13 and self.player_turn == self.player_one: # skip other players store
                         selected_field += 1
-                        selected_field = selected_field % len(self.fields) # check again if modulo index of selected field is over the length of fields
-                        self.fields[selected_field] += 1
+                        selected_field = selected_field % len(fields) # check again if modulo index of selected field is over the length of fields
+                        fields[selected_field] += 1
 
                     else: # regular field, always put seed
-                        self.fields[selected_field] += 1
+                        fields[selected_field] += 1
 
 
-                if sum(self.fields[0:6]) == 0:
-                    self.fields[6] += sum(self.fields[7:13])
-                    self.fields[7:13] = [0]*6
+                if sum(fields[0:6]) == 0:
+                    fields[6] += sum(fields[7:13])
+                    fields[7:13] = [0]*6
 
-                elif sum(self.fields[7:13]) == 0:
-                    self.fields[13] += sum(self.fields[0:6])
-                    self.fields[0:6] = [0]*6
+                elif sum(fields[7:13]) == 0:
+                    fields[13] += sum(fields[0:6])
+                    fields[0:6] = [0]*6
 
-                print("the field: ", self.fields)
+                print("the field: ", fields)
                 print("the selected field after turn finish is ", selected_field)
 
                 if self.check_result():
-                    return None
+                    return fields, None
 
                 if selected_field == 6 or selected_field == 13: # if landed in kalaha
-                    return selected_field
-                if self.fields[selected_field] == 1: # if last field was empty
-                    return selected_field
+                    return fields, selected_field
+                if fields[selected_field] == 1: # if last field was empty
+                    return fields, selected_field
                 else:
-                    return self.move(selected_field)
+                    return self.move(fields, selected_field)
 
     class Player:
         def __init__(self, name):
