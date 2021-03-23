@@ -1,4 +1,6 @@
 import random
+from search import findMiniMax
+from copy import deepcopy
 
 class InvalidField(Exception):
     def __init__(self,*args,**kwargs):
@@ -20,7 +22,7 @@ class Kalaha:
         self.fields[13] = 0
 
         self.player_one = self.Player(input("Enter player one name "))
-        self.player_two = self.Player(input("Enter player two name "))
+        self.player_two = self.Player("Skynet")
 
         self.player_turn = self.player_one if random.randint(0, 1)== 1 else self.player_two
 
@@ -30,7 +32,14 @@ class Kalaha:
 
     def run_game(self):
         while self.game_running:
-            self.take_turn()
+            if self.player_turn == self.player_one:
+                self.take_turn()
+            else:
+                kalaha_copy = deepcopy(self)
+                minimax_value, selected_field = findMiniMax(kalaha_copy, 5, True)
+                print("Player two selected field {}".format(selected_field))
+                self.move(self.fields, selected_field)
+                
 
         print("Game completed")
         if (self.won != None):
@@ -65,6 +74,8 @@ class Kalaha:
 
     def take_turn(self):
         print("It is player {}'s turn".format(self.player_turn.name))
+        if (self.player_turn == self.player_one):
+            print("You can select index 0-5")
         selected_field = input("Enter selected field:\n") # ask for field selection for next move
 
         while type(selected_field) is not int: 
@@ -89,12 +100,11 @@ class Kalaha:
                 selected_field = input("Enter selected field:\n")
 
 
-        print("the field: ", self.fields)
+        print("the fields: ", self.fields)
         print("the selected field after turn finish is ", selected_field)
         if selected_field == 6 or selected_field == 13:
             return
-        else:
-            self.change_player_turn()
+
 
 
     def move(self, fields, selected_field):
@@ -125,8 +135,8 @@ class Kalaha:
                     fields[13] += sum(fields[0:6])
                     fields[0:6] = [0]*6
 
-                print("the field: ", fields)
-                print("the selected field after turn finish is ", selected_field)
+                # print("the fields: ", fields)
+                # print("the selected field after turn finish is ", selected_field)
 
                 if self.check_result():
                     return fields, None
@@ -134,6 +144,7 @@ class Kalaha:
                 if selected_field == 6 or selected_field == 13: # if landed in kalaha
                     return fields, selected_field
                 if fields[selected_field] == 1: # if last field was empty
+                    self.change_player_turn()
                     return fields, selected_field
                 else:
                     return self.move(fields, selected_field)
