@@ -141,10 +141,9 @@ class Kalaha:
                     fields[0:6] = [0]*6
 
                 if simulation == False:
-                    print("line 140")
                     print("the fields: ", fields)
                     print("the selected field after move finish is ", selected_field)
-                    # time.sleep(0.5)
+                    time.sleep(0.5)
 
                 if self.check_result():
                     return fields, None
