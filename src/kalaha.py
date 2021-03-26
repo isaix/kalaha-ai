@@ -1,6 +1,7 @@
 import random
-from search import findMiniMax
+from search import findMiniMax, count
 from copy import deepcopy
+import time
 
 class InvalidField(Exception):
     def __init__(self,*args,**kwargs):
@@ -36,9 +37,14 @@ class Kalaha:
                 self.take_turn()
             else:
                 kalaha_copy = deepcopy(self)
+                print("{} is calculating the next move...".format(self.player_two.name))
                 minimax_value, selected_field = findMiniMax(kalaha_copy, 5, True)
+                print("minimax value", minimax_value)
+                print("selected_field", selected_field)
+                print("minimax ran {} times".format(count))
                 print("Player two selected field {}".format(selected_field))
                 self.move(self.fields, selected_field)
+
                 
 
         print("Game completed")
@@ -58,7 +64,7 @@ class Kalaha:
             self.won = self.player_two
             self.game_running = False
             return True
-        elif(self.fields[6] == sum(self.fields)/2 and self.fields[13] == sum(fields)/2):
+        elif(self.fields[6] == sum(self.fields)/2 and self.fields[13] == sum(self.fields)/2):
             self.game_running = False
             return True
         else:
@@ -99,15 +105,14 @@ class Kalaha:
                 print("Invalid field selected")
                 selected_field = input("Enter selected field:\n")
 
-
-        print("the fields: ", self.fields)
-        print("the selected field after turn finish is ", selected_field)
+        # print("the fields: ", self.fields)
+        # print("the selected field after turn finish is ", selected_field)
         if selected_field == 6 or selected_field == 13:
             return
 
 
 
-    def move(self, fields, selected_field):
+    def move(self, fields, selected_field, simulation = False):
 
                 seeds = fields[selected_field] # take seeds from selected field
                 fields[selected_field] = 0 # set selected field to empty
@@ -135,8 +140,11 @@ class Kalaha:
                     fields[13] += sum(fields[0:6])
                     fields[0:6] = [0]*6
 
-                # print("the fields: ", fields)
-                # print("the selected field after turn finish is ", selected_field)
+                if simulation == False:
+                    print("line 140")
+                    print("the fields: ", fields)
+                    print("the selected field after move finish is ", selected_field)
+                    # time.sleep(0.5)
 
                 if self.check_result():
                     return fields, None
@@ -147,7 +155,7 @@ class Kalaha:
                     self.change_player_turn()
                     return fields, selected_field
                 else:
-                    return self.move(fields, selected_field)
+                    return self.move(fields, selected_field, simulation)
 
     class Player:
         def __init__(self, name):
